@@ -1,0 +1,38 @@
+clc;clear all;close all
+
+load('D:\project 7\rate_final\spike_result\trained_weights.mat', 'weights');  % Load the 2x85 weight matrix
+weights = weights * 10;  % Scale weights if necessary
+
+% SNN Parameters
+numNeurons = 2;                 % Number of neurons (must match training setup)
+tau = 10;                       % Time constant (same as in training)
+threshold = 0.5;                % Firing threshold (same as in training)
+
+% Load test spike data (replace 'testFile.txt' with your actual test file name)
+testFile = 'D:\project 7\rate_final\spike_result\so45.txt';
+testSpikeData = load(testFile); % Load spike data from test file
+testTimeSteps = length(testSpikeData);  % Number of time steps in test data
+
+% Initialize membrane potential and prediction array
+testMembranePotential = zeros(numNeurons, 1);  % Membrane potential for prediction
+predictions = zeros(testTimeSteps, 1);  % Prediction results for each time step
+
+% Prediction loop
+for t = 1:testTimeSteps
+    % Calculate membrane potential based on test data
+    testMembranePotential = testMembranePotential * exp(-1 / tau) + weights * testSpikeData(t);
+    
+    % Check if any neuron fires (indicating a potential arrhythmia prediction)
+    if any(testMembranePotential >= threshold)
+        predictions(t) = 1;  % Store 1 if a neuron fires
+        % Reset potential for neurons that fired
+        testMembranePotential(testMembranePotential >= threshold) = 0;
+    end
+end
+
+% Analyze the predictions (e.g., if any spike indicates arrhythmia)
+if any(predictions)
+    disp('Arrhythmia detected in test data.');
+else
+    disp('No arrhythmia detected in test data.');
+end
