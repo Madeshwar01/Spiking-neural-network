@@ -1,0 +1,49 @@
+% SECTION 1: Generate Weights for SNN Model Using Spike Input
+clc;clear all;close all
+% Define the directory path and input file names
+folderPath = 'D:\project 7\rate_final\spike_result\';
+numFiles = 85;
+fileNames = arrayfun(@(x) sprintf('%sso%d.txt', folderPath, x), 1:numFiles, 'UniformOutput', false);
+
+% SNN Parameters
+numNeurons = 2;                % Number of neurons (adjust as needed)
+tau = 10;                      % Time constant
+threshold = 1;                 % Firing threshold
+learningRate = 0.1;            % Learning rate for weight update
+
+% Initialize weights and membrane potentials
+weights = randn(numNeurons, numFiles);  % Initial random weights
+membranePotential = zeros(numNeurons, numFiles);  % Membrane potentials
+
+% Load spike data and prepare matrix
+spikeData = cell(numFiles, 1);
+for i = 1:numFiles
+    spikeData{i} = load(fileNames{i});  % Load each file (assuming each file has same length)
+end
+timeSteps = length(spikeData{1});       % Number of time steps (assuming all files have the same length)
+spikeMatrix = zeros(timeSteps, numFiles);
+for i = 1:numFiles
+    spikeMatrix(:, i) = spikeData{i};   % Arrange spike data into columns
+end
+
+% Training loop
+for t = 1:timeSteps
+    for fileIdx = 1:numFiles
+        % Calculate membrane potential for each neuron and input file
+        membranePotential(:, fileIdx) = membranePotential(:, fileIdx) * exp(-1 / tau) + weights(:, fileIdx) * spikeMatrix(t, fileIdx);
+
+        % Check if neuron fires
+        fired = membranePotential(:, fileIdx) >= threshold;
+
+        % Update weights if neuron fires
+        if any(fired)
+            weights(:, fileIdx) = weights(:, fileIdx) + learningRate * spikeMatrix(t, fileIdx); % STDP weight update
+            membranePotential(fired, fileIdx) = 0;  % Reset membrane potential after firing
+        end
+    end
+end
+
+% Save the generated weights for later use in prediction
+save('D:\project 7\rate_final\spike_result\trained_weights.mat', 'weights');
+disp('Training complete. Weights saved to "trained_weights.mat"');
+disp(weights)
