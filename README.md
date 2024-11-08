@@ -19,3 +19,11 @@ A memory_read module with a 10-bit address counter sequentially accesses 32-bit 
 SNN Encoding:
 MSBs of BRAM data are fed into SNN encoding modules (rate coding, burst coding, phase coding, TTFS coding) to generate spike trains for neural network processing.
 
+Flowchart for SNN classifier in Python:
+
+<img width="647" alt="image" src="https://github.com/user-attachments/assets/47c9e701-843c-4134-9f36-88314a7a95d3">
+
+
+Our project investigates the implementation of neural encoding algorithms in Spiking Neural Networks (SNNs) using the EEG signals’ dataset, focusing on optimizing performance.
+The project lays the groundwork for future research, particularly in extending these encoding strategies to practical applications such as medical diagnosis. 
+
